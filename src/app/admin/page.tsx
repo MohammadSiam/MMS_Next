@@ -14,7 +14,7 @@ export default function Admin() {
     e.preventDefault();
 
     // Check if the email and password match the admin credentials
-    if (email === "admin@example.com" && password === "adminpassword") {
+    if (email === "admin@example.com" && password === "1234") {
       // Navigate to the admin dashboard if the credentials are correct
       router.push("/admin/dashboard");
     } else {

@@ -4,6 +4,23 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+export type FormData = {
+  startTime: string;
+  endTime: string;
+  date: string;
+  numberOfAttendees: string;
+  organization: string;
+  designation: string;
+  roomNumber: string;
+  userId: string; // Add userId property to FormData type
+};
+
+type Meeting = {
+  startTime: string;
+  endTime: string;
+  // Add other necessary properties
+};
+
 const BookingSystem: React.FC = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -14,6 +31,7 @@ const BookingSystem: React.FC = () => {
     organization: "",
     designation: "",
     roomNumber: "",
+    userId: "",
   });
   const [error, setError] = useState("");
 
@@ -52,27 +70,44 @@ const BookingSystem: React.FC = () => {
 
   const isValidTime = (time: string): boolean => {
     const [hours, minutes] = time.split(":").map(Number);
-    return hours >= 8 && hours < 18 && minutes >= 0 && minutes < 60;
+    return hours >= 8 && hours <= 18 && minutes >= 0 && minutes <= 60;
   };
 
   const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newStartTime = e.target.value;
-    if (!isValidTime(newStartTime)) {
+    e.preventDefault();
+    const newStartTime = e.currentTarget.value;
+    const [hours, minutes] = newStartTime.split(":").map(Number);
+
+    // Round the minutes to the nearest valid minute (either 0 or 30)
+    const roundedMinutes = Math.round(minutes / 30) * 30;
+
+    // Construct the new start time with the rounded minutes
+    const startTimeWithRoundedMinutes = `${String(hours).padStart(
+      2,
+      "0"
+    )}:${String(roundedMinutes).padStart(2, "0")}`;
+
+    if (!isValidTime(startTimeWithRoundedMinutes)) {
       setError("Start time must be between 8:00 am and 6:00 pm.");
     } else {
       setError("");
-      setFormData({ ...formData, startTime: newStartTime });
+      // Update formData with new start time
+      setFormData({
+        ...formData,
+        startTime: startTimeWithRoundedMinutes,
+        // Automatically update end time after 1 hour
+        endTime: calculateEndTime(startTimeWithRoundedMinutes),
+      });
     }
   };
 
-  const handleEndTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newEndTime = e.target.value;
-    if (!isValidTime(newEndTime)) {
-      setError("End time must be between 8:00 am and 6:00 pm.");
-    } else {
-      setError("");
-      setFormData({ ...formData, endTime: newEndTime });
-    }
+  // Function to calculate end time after 1 hour from start time
+  const calculateEndTime = (startTime: string): string => {
+    const start = new Date(`2000-01-01T${startTime}`);
+    start.setHours(start.getHours() + 1);
+    return `${String(start.getHours()).padStart(2, "0")}:${String(
+      start.getMinutes()
+    ).padStart(2, "0")}`;
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -148,9 +183,10 @@ const BookingSystem: React.FC = () => {
                   id="endTime"
                   name="endTime"
                   value={formData.endTime}
-                  onChange={handleEndTimeChange}
+                  // onChange={handleEndTimeChange}
                   min="08:00"
                   max="18:00"
+                  disabled
                   className="border-gray-300 border w-full rounded-md px-3 py-2"
                 />
               </div>
