@@ -43,7 +43,6 @@ const RegistrationPage: React.FC = () => {
           },
         }
       );
-      console.log(response.data);
       router.push("/Login");
     } catch (error) {
       console.log(error);

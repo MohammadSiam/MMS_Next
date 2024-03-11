@@ -26,7 +26,6 @@ const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(formData);
     // Add registration logic here
     // Once registration is successful, navigate to login page
 
@@ -42,7 +41,6 @@ const LoginPage: React.FC = () => {
           },
         }
       );
-      console.log(response.data.userId);
       localStorage.setItem("userId", response.data.token.userId);
       localStorage.setItem("token", response.data.token);
       router.push("/");

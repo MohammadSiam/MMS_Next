@@ -15,12 +15,6 @@ export type FormData = {
   userId: string; // Add userId property to FormData type
 };
 
-type Meeting = {
-  startTime: string;
-  endTime: string;
-  // Add other necessary properties
-};
-
 const BookingSystem: React.FC = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -35,9 +29,32 @@ const BookingSystem: React.FC = () => {
   });
   const [error, setError] = useState("");
 
+  const [bookedStartTime, setBookedStartTime] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchMeetings = async () => {
+      try {
+        const selectedDate = formData.date;
+        if (selectedDate) {
+          const response = await axios.get(
+            `http://localhost:3000/book/getAllMeetingsByDate/${selectedDate}`
+          );
+          const meetings: any[] = response.data;
+          const bookedStartTimes = meetings.map((meeting) => meeting.startTime);
+          const hoursArray = bookedStartTimes.map((time) => time.split(":")[0]);
+          const uniqueHoursArray = Array.from(new Set(hoursArray));
+
+          setBookedStartTime(uniqueHoursArray);
+        }
+      } catch (error) {
+        console.error("Error fetching meetings:", error);
+      }
+    };
+    fetchMeetings();
+  }, [formData.date]);
+
   useEffect(() => {
     const token = localStorage.getItem("token");
-    console.log(token);
     if (token) {
       try {
         // Split the token into its parts: header, payload, and signature
@@ -48,9 +65,6 @@ const BookingSystem: React.FC = () => {
 
         // Extract the userId from the payload
         const userId = payload.userId;
-
-        console.log(payload);
-        console.log(userId);
 
         // Update formData with userId
         setFormData({ ...formData, userId });
@@ -70,33 +84,28 @@ const BookingSystem: React.FC = () => {
 
   const isValidTime = (time: string): boolean => {
     const [hours, minutes] = time.split(":").map(Number);
-    return hours >= 8 && hours <= 18 && minutes >= 0 && minutes <= 60;
+    return hours >= 8 && hours < 18 && minutes >= 0 && minutes <= 60;
   };
 
   const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     const newStartTime = e.currentTarget.value;
-    const [hours, minutes] = newStartTime.split(":").map(Number);
+    const selectedHour = newStartTime.split(":")[0]; // Extract the hour part
 
-    // Round the minutes to the nearest valid minute (either 0 or 30)
-    const roundedMinutes = Math.round(minutes / 30) * 30;
+    const startTimeWithHourOnly = `${String(selectedHour).padStart(2, "0")}:00`;
 
-    // Construct the new start time with the rounded minutes
-    const startTimeWithRoundedMinutes = `${String(hours).padStart(
-      2,
-      "0"
-    )}:${String(roundedMinutes).padStart(2, "0")}`;
-
-    if (!isValidTime(startTimeWithRoundedMinutes)) {
+    if (!isValidTime(startTimeWithHourOnly)) {
       setError("Start time must be between 8:00 am and 6:00 pm.");
+    } else if (bookedStartTime.includes(selectedHour)) {
+      setError("This time is already booked.");
     } else {
       setError("");
       // Update formData with new start time
       setFormData({
         ...formData,
-        startTime: startTimeWithRoundedMinutes,
+        startTime: startTimeWithHourOnly,
         // Automatically update end time after 1 hour
-        endTime: calculateEndTime(startTimeWithRoundedMinutes),
+        endTime: calculateEndTime(startTimeWithHourOnly),
       });
     }
   };
@@ -113,9 +122,6 @@ const BookingSystem: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Add booking logic here
-    console.log(formData);
-
     try {
       const jsonData = JSON.stringify(formData);
 
@@ -128,7 +134,6 @@ const BookingSystem: React.FC = () => {
           },
         }
       );
-      console.log(response.data);
     } catch (error) {
       console.log(error);
     }
@@ -142,7 +147,7 @@ const BookingSystem: React.FC = () => {
     //   roomNumber: "",
     // });
     alert("Wait for admin approval");
-    // router.push("/");
+    router.push("/meetingList");
   };
 
   return (
@@ -153,6 +158,22 @@ const BookingSystem: React.FC = () => {
           <h2 className="text-2xl font-bold mb-4">Book a meeting</h2>
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="col-span-2 mb-4">
+                <label
+                  htmlFor="date"
+                  className="block text-gray-700 font-semibold mb-2"
+                >
+                  Date
+                </label>
+                <input
+                  type="date"
+                  id="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleChange}
+                  className="border-gray-300 border w-full rounded-md px-3 py-2"
+                />
+              </div>
               <div className="mb-4">
                 <label
                   htmlFor="startTime"
@@ -187,22 +208,6 @@ const BookingSystem: React.FC = () => {
                   min="08:00"
                   max="18:00"
                   disabled
-                  className="border-gray-300 border w-full rounded-md px-3 py-2"
-                />
-              </div>
-              <div className="mb-4">
-                <label
-                  htmlFor="date"
-                  className="block text-gray-700 font-semibold mb-2"
-                >
-                  Date
-                </label>
-                <input
-                  type="date"
-                  id="date"
-                  name="date"
-                  value={formData.date}
-                  onChange={handleChange}
                   className="border-gray-300 border w-full rounded-md px-3 py-2"
                 />
               </div>
@@ -255,7 +260,7 @@ const BookingSystem: React.FC = () => {
                   className="border-gray-300 border w-full rounded-md px-3 py-2"
                 />
               </div>
-              <div className="col-span-2 mb-4">
+              <div className=" mb-4">
                 <label
                   htmlFor="roomNumber"
                   className="block text-gray-700 font-semibold mb-2"

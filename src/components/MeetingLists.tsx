@@ -41,7 +41,6 @@ const MeetingList = () => {
     fetchMeetings();
   }, []);
 
-  console.log(meetings);
   return (
     <>
       <NavBar />
