@@ -36,7 +36,6 @@ const BookingSystem: React.FC = () => {
 
   const [bookedStartTime, setBookedStartTime] = useState<string[]>([]);
   const [pendingMeetings, setPendingMeetings] = useState<MeetingInfo[]>([]);
-  const [rejectedMeetings, setRejectedMeetings] = useState<MeetingInfo[]>([]);
 
   useEffect(() => {
     const fetchMeetings = async () => {
@@ -55,12 +54,8 @@ const BookingSystem: React.FC = () => {
           const pendingMeetings = meetingStatuses.filter(
             (meeting) => meeting.status === "pending"
           );
-          const rejectedMeetings = meetingStatuses.filter(
-            (meeting) => meeting.status === "rejected"
-          );
-          setPendingMeetings(pendingMeetings);
-          setRejectedMeetings(rejectedMeetings);
 
+          setPendingMeetings(pendingMeetings);
           const bookedStartTimes = meetings
             .filter((meeting) => meeting.status != "rejected")
             .map((meeting) => meeting.startTime);
@@ -102,21 +97,14 @@ const BookingSystem: React.FC = () => {
     }
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: any) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  // const isValidTime = (time: string): boolean => {
-  //   const [hours, minutes] = time.split(":").map(Number);
-  //   return hours >= 8 && hours < 18 && minutes >= 0 && minutes <= 60;
-  // };
-
-  const handleStartTimeChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ): void => {
+  const handleStartTimeChange = (e: any): void => {
     e.preventDefault();
     const newStartTime = e.currentTarget.value;
     const selectedHour = newStartTime.split(":")[0]; // Extract the hour part
@@ -212,7 +200,6 @@ const BookingSystem: React.FC = () => {
                   <option value="101">101</option>
                   <option value="102">102</option>
                   <option value="103">103</option>
-                  {/* Add more options as needed */}
                 </select>
               </div>
               <div className="mb-4">

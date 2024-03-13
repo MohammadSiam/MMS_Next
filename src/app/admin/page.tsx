@@ -1,24 +1,60 @@
 "use client";
 
 import NavBar from "@/components/Navbar";
+import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function Admin() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
   const [error, setError] = useState("");
 
-  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Check if the email and password match the admin credentials
-    if (email === "admin@example.com" && password === "1234") {
-      // Navigate to the admin dashboard if the credentials are correct
-      router.push("/admin/dashboard");
-    } else {
-      setError("Invalid email or password");
+    try {
+      const jsonData = JSON.stringify(formData);
+
+      const response = await axios.post(
+        "http://localhost:3000/api/login/admin",
+        jsonData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.length > 0) {
+        router.push("/admin/dashboard");
+      } else {
+        setError("You didn't get admin access");
+      }
+      setFormData({
+        email: "",
+        password: "",
+      });
+    } catch (error: any) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        setError(error.response.data.message);
+      } else {
+        setError("An unexpected error occurred");
+      }
     }
   };
   return (
@@ -38,8 +74,9 @@ export default function Admin() {
               <input
                 type="email"
                 id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
                 className="border-gray-300 border w-full rounded-md px-3 py-2"
                 required
               />
@@ -54,8 +91,9 @@ export default function Admin() {
               <input
                 type="password"
                 id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
                 className="border-gray-300 border w-full rounded-md px-3 py-2"
                 required
               />

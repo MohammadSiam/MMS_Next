@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@tailwindcss/postcss7-compat": "^2.2.17",
+    "@types/jsonwebtoken": "^9.0.6",
     "@types/jwt-decode": "^3.1.0",
     "axios": "^1.6.7",
     "jsonwebtoken": "^9.0.2",

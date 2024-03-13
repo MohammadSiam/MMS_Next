@@ -2,6 +2,7 @@
 "use client";
 import NavBar from "@/components/Navbar";
 import axios from "axios";
+import jwt from "jsonwebtoken";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -12,7 +13,7 @@ const LoginPage: React.FC = () => {
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
-
+  const [error, setError] = useState("");
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -43,13 +44,29 @@ const LoginPage: React.FC = () => {
       );
       localStorage.setItem("userId", response.data.token.userId);
       localStorage.setItem("token", response.data.token);
-      router.push("/meetingList");
+      // Check if the user is an admin
+      const tokenData: any = jwt.decode(response.data.token);
+      if (tokenData.role === "admin") {
+        // Redirect to admin dashboard if user is admin
+        router.push("/admin/dashboard");
+      } else {
+        // Redirect to regular user dashboard or meeting list page
+        router.push("/meetingList");
+      }
       setFormData({
         email: "",
         password: "",
       });
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        setError(error.response.data.message);
+      } else {
+        setError("An unexpected error occurred");
+      }
     }
   };
   return (
@@ -103,6 +120,7 @@ const LoginPage: React.FC = () => {
                 )}
               </div>
             </div>
+            {error && <p className="text-red-500 mb-4">{error}</p>}
             <button
               type="submit"
               className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"

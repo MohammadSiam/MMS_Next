@@ -13,7 +13,7 @@ const RegistrationPage: React.FC = () => {
     department: "",
     password: "",
   });
-
+  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const toggleShowPassword = () => {
@@ -43,9 +43,19 @@ const RegistrationPage: React.FC = () => {
           },
         }
       );
+      console.log(response.data.message);
       router.push("/Login");
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        setError(error.response.data.message);
+      } else {
+        setError("An unexpected error occurred");
+      }
     }
   };
 
@@ -150,6 +160,8 @@ const RegistrationPage: React.FC = () => {
                 </div>
               </div>
             </div>
+            {error && <p className="text-red-500 mb-4">{error}</p>}
+
             <button
               type="submit"
               className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
