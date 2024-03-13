@@ -42,8 +42,8 @@ const LoginPage: React.FC = () => {
           },
         }
       );
-      localStorage.setItem("userId", response.data.token.userId);
-      localStorage.setItem("token", response.data.token);
+      sessionStorage.setItem("userId", response.data.token.userId);
+      sessionStorage.setItem("token", response.data.token);
       // Check if the user is an admin
       const tokenData: any = jwt.decode(response.data.token);
       if (tokenData.role === "admin") {

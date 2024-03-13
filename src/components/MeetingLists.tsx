@@ -13,7 +13,7 @@ const MeetingList = () => {
     const fetchMeetings = async () => {
       try {
         // Retrieve the JWT token from localStorage
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         if (!token) {
           router.push("/Login");
         }

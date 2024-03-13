@@ -1,28 +1,38 @@
 // NavBar.tsx
 "use client";
+import { jwtDecode } from "jwt-decode";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const NavBar: React.FC = () => {
   const [token, setToken] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     // Access localStorage only on the client side
-    const storedToken = localStorage.getItem("token");
+    const storedToken = sessionStorage.getItem("token");
+    if (storedToken) {
+      setToken(storedToken);
+      const decodedToken: any = jwtDecode(storedToken);
+      setRole(decodedToken.role);
+    } else {
+      setToken(null);
+      setRole(null);
+    }
     // if (!token) {
     //   router.push("/Login");
     // }
-    setToken(storedToken);
   }, [token, router]);
 
   const handleLogout = () => {
     window.location.reload();
     // Clear token from local storage
-    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
     // Update token state
     setToken(null);
+    setRole(null);
   };
 
   return (
@@ -37,13 +47,17 @@ const NavBar: React.FC = () => {
             </div>
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4">
-                <Link legacyBehavior href="/admin">
-                  <a className="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
-                    Admin
-                  </a>
-                </Link>
-                {token ? (
+                {role === "admin" || role === "user" ? (
                   <>
+                    {role === "admin" && (
+                      <>
+                        <Link legacyBehavior href="/admin">
+                          <a className="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                            Admin
+                          </a>
+                        </Link>
+                      </>
+                    )}
                     <Link legacyBehavior href="/booking">
                       <a className="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
                         Booking

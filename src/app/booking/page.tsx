@@ -73,7 +73,7 @@ const BookingSystem: React.FC = () => {
   }, [formData.date, formData.roomNumber]);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (token) {
       try {
         // Split the token into its parts: header, payload, and signature

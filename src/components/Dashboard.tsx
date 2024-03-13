@@ -5,6 +5,7 @@ import NavBar from "./Navbar";
 export type Datatype = {
   meeting: MeetingType;
   username: string;
+  email: string;
 };
 
 export type MeetingType = {
@@ -23,6 +24,7 @@ export type MeetingType = {
 
 const Dashboard = () => {
   const [meetings, setMeetings] = useState<Datatype[]>([]);
+  const [userRole, setUserRole] = useState<string>("");
 
   const fetchMeetings = async () => {
     try {
@@ -39,41 +41,44 @@ const Dashboard = () => {
     fetchMeetings();
   }, []);
 
-  const handleAccept = async (meetingId: any, index: number) => {
+  const handleAction = async (
+    meetingId: any,
+    action: string,
+    index: number
+  ) => {
     try {
       const response = await axios.put(
-        `http://localhost:3000/book/${meetingId}/approve`
+        `http://localhost:3000/book/${meetingId}/${action}`
       );
       if (response.status === 200) {
-        console.log("Meeting accepted successfully");
+        console.log(`Meeting ${action}ed successfully`);
         // Update the status in the local state
         const updatedMeetings = [...meetings];
-        updatedMeetings[index].meeting.status = "approved";
+        updatedMeetings[index].meeting.status =
+          action === "approve" ? "approved" : "rejected";
         setMeetings(updatedMeetings);
       } else {
-        console.error("Failed to accept meeting:", response.data);
+        console.error(`Failed to ${action} meeting:`, response.data);
       }
     } catch (error) {
-      console.error("Error accepting meeting:", error);
+      console.error(`Error ${action}ing meeting:`, error);
     }
   };
 
-  const handleReject = async (meetingId: any, index: number) => {
+  const handleChangeRole = async (email: string) => {
     try {
       const response = await axios.put(
-        `http://localhost:3000/book/${meetingId}/reject`
+        `http://localhost:3000/book/updateAdminRole/${email}`,
+        { role: "admin" }
       );
       if (response.status === 200) {
-        console.log("Meeting rejected successfully");
-        // Update the status in the local state
-        const updatedMeetings = [...meetings];
-        updatedMeetings[index].meeting.status = "rejected";
-        setMeetings(updatedMeetings);
+        console.log("Role changed successfully");
+        setUserRole("admin"); // Update the user role in the state
       } else {
-        console.error("Failed to reject meeting:", response.data);
+        console.error("Failed to change role:", response.data);
       }
     } catch (error) {
-      console.error("Error rejecting meeting:", error);
+      console.error("Error changing role:", error);
     }
   };
 
@@ -94,6 +99,7 @@ const Dashboard = () => {
               <th className="text-left py-2">Room Number</th>
               <th className="text-left py-2">User Name</th>
               <th className="text-left py-2">Action</th>
+              <th className="text-left py-2">Change Role</th>
             </tr>
           </thead>
           <tbody>
@@ -119,7 +125,11 @@ const Dashboard = () => {
                       <>
                         <button
                           onClick={() =>
-                            handleAccept(data.meeting.meetingId, index)
+                            handleAction(
+                              data.meeting.meetingId,
+                              "approve",
+                              index
+                            )
                           }
                           className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
                         >
@@ -127,13 +137,27 @@ const Dashboard = () => {
                         </button>
                         <button
                           onClick={() =>
-                            handleReject(data.meeting.meetingId, index)
+                            handleAction(
+                              data.meeting.meetingId,
+                              "reject",
+                              index
+                            )
                           }
                           className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
                         >
                           Reject
                         </button>
                       </>
+                    )}
+                  </td>
+                  <td className="px-4 py-2">
+                    {userRole !== "admin" && (
+                      <button
+                        onClick={() => handleChangeRole(data.email)}
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                      >
+                        Change Role
+                      </button>
                     )}
                   </td>
                 </tr>
