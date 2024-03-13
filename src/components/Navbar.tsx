@@ -1,16 +1,29 @@
 // NavBar.tsx
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const NavBar: React.FC = () => {
   const [token, setToken] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     // Access localStorage only on the client side
     const storedToken = localStorage.getItem("token");
+    // if (!token) {
+    //   router.push("/Login");
+    // }
     setToken(storedToken);
-  }, []);
+  }, [token, router]);
+
+  const handleLogout = () => {
+    window.location.reload();
+    // Clear token from local storage
+    localStorage.removeItem("token");
+    // Update token state
+    setToken(null);
+  };
 
   return (
     <nav className="bg-gray-800 py-4">
@@ -29,12 +42,7 @@ const NavBar: React.FC = () => {
                     Admin
                   </a>
                 </Link>
-                <Link legacyBehavior href="/Registration">
-                  <a className="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
-                    Registration
-                  </a>
-                </Link>
-                {token && (
+                {token ? (
                   <>
                     <Link legacyBehavior href="/booking">
                       <a className="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
@@ -46,7 +54,19 @@ const NavBar: React.FC = () => {
                         Meetings
                       </a>
                     </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+                    >
+                      Logout
+                    </button>
                   </>
+                ) : (
+                  <Link legacyBehavior href="/Registration">
+                    <a className="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                      Registration
+                    </a>
+                  </Link>
                 )}
               </div>
             </div>

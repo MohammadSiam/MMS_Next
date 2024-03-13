@@ -4,23 +4,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export type FormData = {
-  startTime: string;
-  endTime: string;
-  date: string;
-  numberOfAttendees: string;
-  organization: string;
-  designation: string;
-  roomNumber: string;
-  userId: string; // Add userId property to FormData type
-};
-
-type MeetingInfo = {
-  status: string;
-  startTime: string;
-};
-
-const BookingSystem: React.FC = () => {
+export const BookingSystem: React.FC = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({
     startTime: "",
@@ -35,8 +19,6 @@ const BookingSystem: React.FC = () => {
   const [error, setError] = useState("");
 
   const [bookedStartTime, setBookedStartTime] = useState<string[]>([]);
-  const [pendingMeetings, setPendingMeetings] = useState<MeetingInfo[]>([]);
-  const [rejectedMeetings, setRejectedMeetings] = useState<MeetingInfo[]>([]);
 
   useEffect(() => {
     const fetchMeetings = async () => {
@@ -48,23 +30,7 @@ const BookingSystem: React.FC = () => {
             `http://localhost:3000/book/getAllMeetingsByDate/${selectedDate}/${roomNumber}`
           );
           const meetings: any[] = response.data;
-          const meetingStatuses: MeetingInfo[] = meetings.map((meeting) => ({
-            status: meeting.status,
-            startTime: meeting.startTime,
-          }));
-          const pendingMeetings = meetingStatuses.filter(
-            (meeting) => meeting.status === "pending"
-          );
-          const rejectedMeetings = meetingStatuses.filter(
-            (meeting) => meeting.status === "rejected"
-          );
-          setPendingMeetings(pendingMeetings);
-          setRejectedMeetings(rejectedMeetings);
-
-          const bookedStartTimes = meetings
-            .filter((meeting) => meeting.status != "rejected")
-            .map((meeting) => meeting.startTime);
-          console.log();
+          const bookedStartTimes = meetings.map((meeting) => meeting.startTime);
           const hoursArray = bookedStartTimes.map((time) => time.split(":")[0]);
           const uniqueHoursArray = Array.from(new Set(hoursArray));
 
@@ -109,28 +75,35 @@ const BookingSystem: React.FC = () => {
     });
   };
 
-  // const isValidTime = (time: string): boolean => {
-  //   const [hours, minutes] = time.split(":").map(Number);
-  //   return hours >= 8 && hours < 18 && minutes >= 0 && minutes <= 60;
-  // };
+  const isValidTime = (time: string): boolean => {
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours >= 8 && hours < 18 && minutes >= 0 && minutes <= 60;
+  };
 
-  const handleStartTimeChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ): void => {
+  const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
-    const newStartTime = e.currentTarget.value;
+    const newStartTime = e.target.value;
     const selectedHour = newStartTime.split(":")[0]; // Extract the hour part
 
     const startTimeWithHourOnly = `${String(selectedHour).padStart(2, "0")}:00`;
     console.log(startTimeWithHourOnly, newStartTime);
 
-    setFormData({
-      ...formData,
-      startTime: newStartTime,
-      // Automatically update end time after 1 hour
-      endTime: calculateEndTime(startTimeWithHourOnly),
-    });
+    if (!isValidTime(startTimeWithHourOnly)) {
+      setError("Start time must be between 8:00 am and 6:00 pm.");
+    } else if (bookedStartTime.includes(selectedHour)) {
+      setError("This time is already booked.");
+    } else {
+      setError("");
+      // Update formData with new start time
+      setFormData({
+        ...formData,
+        startTime: startTimeWithHourOnly,
+        // Automatically update end time after 1 hour
+        endTime: calculateEndTime(startTimeWithHourOnly),
+      });
+    }
   };
+
   const calculateEndTime = (startTime: string): string => {
     const start = new Date(`2000-01-01T${startTime}`);
     start.setHours(start.getHours() + 1);
@@ -205,7 +178,7 @@ const BookingSystem: React.FC = () => {
                   id="roomNumber"
                   name="roomNumber"
                   value={formData.roomNumber}
-                  onChange={handleChange}
+                  onChange={() => handleChange}
                   className="border-gray-300 border w-full rounded-md px-3 py-2"
                 >
                   <option value="">Select Room</option>
@@ -226,7 +199,7 @@ const BookingSystem: React.FC = () => {
                   id="startTime"
                   name="startTime"
                   value={formData.startTime}
-                  onChange={handleStartTimeChange}
+                  onChange={() => handleStartTimeChange}
                   disabled={!formData.date || !formData.roomNumber}
                   className="border-gray-300 border w-full rounded-md px-3 py-2"
                 >
@@ -234,25 +207,18 @@ const BookingSystem: React.FC = () => {
                   {Array.from({ length: 10 }, (_, index) => {
                     const hour = index + 8; // Starting from 8:00
                     const formattedHour = hour.toString().padStart(2, "0");
-                    const time = `${formattedHour}:00:00`;
+                    const time = `${formattedHour}:00`;
 
                     // Check if the time is in bookedStartTime array
                     const isBooked = bookedStartTime.includes(formattedHour);
-                    // Check if the time is in pendingMeetings array
-                    const isPending = pendingMeetings.some(
-                      (meeting) =>
-                        meeting.startTime === time &&
-                        meeting.status === "pending"
-                    );
 
                     return (
                       <option
                         key={hour}
                         value={time}
-                        disabled={isBooked || isPending} // Disable the option if the time is booked
+                        disabled={isBooked} // Disable the option if the time is booked
                       >
-                        {time.split(":").slice(0, 2).join(":")}{" "}
-                        {isPending && " - Pending"}
+                        {time}
                       </option>
                     );
                   })}
@@ -341,5 +307,3 @@ const BookingSystem: React.FC = () => {
     </>
   );
 };
-
-export default BookingSystem;

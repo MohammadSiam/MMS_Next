@@ -43,7 +43,7 @@ const LoginPage: React.FC = () => {
       );
       localStorage.setItem("userId", response.data.token.userId);
       localStorage.setItem("token", response.data.token);
-      router.push("/");
+      router.push("/meetingList");
       setFormData({
         email: "",
         password: "",

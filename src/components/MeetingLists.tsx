@@ -1,17 +1,22 @@
 "use client";
 
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import NavBar from "./Navbar";
 
 const MeetingList = () => {
   const [meetings, setMeetings] = useState([]);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchMeetings = async () => {
       try {
         // Retrieve the JWT token from localStorage
         const token = localStorage.getItem("token");
+        if (!token) {
+          router.push("/Login");
+        }
 
         if (token) {
           // Split the token into its parts: header, payload, and signature
