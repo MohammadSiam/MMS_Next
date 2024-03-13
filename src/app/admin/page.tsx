@@ -35,7 +35,7 @@ export default function Admin() {
           },
         }
       );
-
+      console.log(response.data);
       if (response.data.length > 0) {
         router.push("/admin/dashboard");
       } else {
@@ -72,7 +72,7 @@ export default function Admin() {
                 Email:
               </label>
               <input
-                type="email"
+                type="text"
                 id="email"
                 name="email"
                 value={formData.email}
