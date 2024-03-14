@@ -1,5 +1,4 @@
 "use client";
-import NavBar from "@/components/Navbar";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -160,7 +159,6 @@ const BookingSystem: React.FC = () => {
 
   return (
     <>
-      <NavBar />
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
           <h2 className="text-2xl font-bold mb-4">Book a meeting</h2>

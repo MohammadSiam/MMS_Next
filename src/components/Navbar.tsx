@@ -8,7 +8,12 @@ import { useEffect, useState } from "react";
 const NavBar: React.FC = () => {
   const [token, setToken] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
+
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
 
   useEffect(() => {
     // Access localStorage only on the client side
@@ -45,18 +50,16 @@ const NavBar: React.FC = () => {
                 <a className="text-white font-bold">Home</a>
               </Link>
             </div>
-            <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-4">
+            <div className="hidden md:block ml-4">
+              <div className="flex items-baseline space-x-4">
                 {role === "admin" || role === "user" ? (
                   <>
                     {role === "admin" && (
-                      <>
-                        <Link legacyBehavior href="/admin">
-                          <a className="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
-                            Admin
-                          </a>
-                        </Link>
-                      </>
+                      <Link legacyBehavior href="/admin/dashboard">
+                        <a className="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                          Admin
+                        </a>
+                      </Link>
                     )}
                     <Link legacyBehavior href="/booking">
                       <a className="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
@@ -76,17 +79,79 @@ const NavBar: React.FC = () => {
                     </button>
                   </>
                 ) : (
-                  <Link legacyBehavior href="/Registration">
-                    <a className="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
-                      Registration
-                    </a>
-                  </Link>
+                  <>
+                    <Link legacyBehavior href="/Registration">
+                      <a className="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                        Registration
+                      </a>
+                    </Link>
+                    <Link legacyBehavior href="/Login">
+                      <a className="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                        Login
+                      </a>
+                    </Link>
+                  </>
                 )}
               </div>
             </div>
           </div>
+          <div className="block md:hidden">
+            <button
+              onClick={toggleMenu}
+              className="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+            >
+              {isOpen ? "Close" : "Menu"}
+            </button>
+          </div>
         </div>
       </div>
+      {/* Mobile menu */}
+      {isOpen && (
+        <div className="md:hidden">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            {role === "admin" || role === "user" ? (
+              <>
+                {role === "admin" && (
+                  <Link legacyBehavior href="/admin/dashboard">
+                    <a className="text-white hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium">
+                      Admin
+                    </a>
+                  </Link>
+                )}
+                <Link legacyBehavior href="/booking">
+                  <a className="text-white hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium">
+                    Booking
+                  </a>
+                </Link>
+                <Link legacyBehavior href="/meetingList">
+                  <a className="text-white hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium">
+                    Meetings
+                  </a>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="text-white hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link legacyBehavior href="/Registration">
+                  <a className="text-white hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium">
+                    Registration
+                  </a>
+                </Link>
+                <Link legacyBehavior href="/Login">
+                  <a className="text-white hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium">
+                    Login
+                  </a>
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 };
