@@ -1,35 +1,49 @@
 // NavBar.tsx
 "use client";
-import { jwtDecode } from "jwt-decode";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const NavBar: React.FC = () => {
   const [token, setToken] = useState<string | null>(null);
-  const [role, setRole] = useState<string | null>(null);
+  const [role, setRole] = useState<any>(null);
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
+  const getUserRole = async () => {
+    const token = await sessionStorage.getItem("token");
+    setToken(token);
+    if (token) {
+      // Split the token into its parts: header, payload, and signature
+      const parts = token.split(".");
 
-  useEffect(() => {
-    // Access localStorage only on the client side
-    const storedToken = sessionStorage.getItem("token");
-    if (storedToken) {
-      setToken(storedToken);
-      const decodedToken: any = jwtDecode(storedToken);
-      setRole(decodedToken.role);
+      // Decode the payload part (which is the second part)
+      const payload = JSON.parse(atob(parts[1]));
+
+      // Extract the userId from the payload
+      const role = payload.role;
+      return role;
     } else {
       setToken(null);
       setRole(null);
     }
-    // if (!token) {
-    //   router.push("/Login");
-    // }
-  }, [token, router]);
+    if (!token) {
+      router.push("/Login");
+    }
+    return null; // Return null if session is not available
+  };
+
+  useEffect(() => {
+    // Fetch and set the user's role when the component mounts
+    const fetchUserRole = async () => {
+      const role = await getUserRole();
+      setRole(role);
+    };
+    fetchUserRole();
+  }, []);
 
   const handleLogout = () => {
     window.location.reload();
@@ -52,9 +66,9 @@ const NavBar: React.FC = () => {
             </div>
             <div className="hidden md:block ml-4">
               <div className="flex items-baseline space-x-4">
-                {role === "admin" || role === "user" ? (
+                {["super admin", "admin", "user"].includes(role) ? (
                   <>
-                    {role === "admin" && (
+                    {(role === "admin" || role === "super admin") && (
                       <Link legacyBehavior href="/admin/dashboard">
                         <a className="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
                           Admin
@@ -63,12 +77,12 @@ const NavBar: React.FC = () => {
                     )}
                     <Link legacyBehavior href="/booking">
                       <a className="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
-                        Booking
+                        Meeting Booking
                       </a>
                     </Link>
                     <Link legacyBehavior href="/meetingList">
                       <a className="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
-                        Meetings
+                        Meetings List
                       </a>
                     </Link>
                     <button

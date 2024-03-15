@@ -24,17 +24,17 @@ const BookingSystem: React.FC = () => {
   const [formData, setFormData] = useState({
     startTime: "",
     endTime: "",
-    date: "",
-    numberOfAttendees: "",
+    date: getCurrentDate(),
+    numberOfAttendees: 1,
     organization: "",
     designation: "",
     roomNumber: "",
     userId: "",
   });
   const [error, setError] = useState("");
-
   const [bookedStartTime, setBookedStartTime] = useState<string[]>([]);
   const [pendingMeetings, setPendingMeetings] = useState<MeetingInfo[]>([]);
+  const organizations = ["AFBL,IT", "Takaful IT", "Akij Electronics"];
 
   useEffect(() => {
     const fetchMeetings = async () => {
@@ -43,7 +43,7 @@ const BookingSystem: React.FC = () => {
         const roomNumber = formData.roomNumber;
         if (selectedDate) {
           const response = await axios.get(
-            `http://localhost:3000/book/getAllMeetingsByDate/${selectedDate}/${roomNumber}`
+            `http://localhost:3000/book/getAllMeetingsByDateRoom/${selectedDate}/${roomNumber}`
           );
           const meetings: any[] = response.data;
           const meetingStatuses: MeetingInfo[] = meetings.map((meeting) => ({
@@ -58,7 +58,7 @@ const BookingSystem: React.FC = () => {
           const bookedStartTimes = meetings
             .filter((meeting) => meeting.status != "rejected")
             .map((meeting) => meeting.startTime);
-          console.log();
+
           const hoursArray = bookedStartTimes.map((time) => time.split(":")[0]);
           const uniqueHoursArray = Array.from(new Set(hoursArray));
 
@@ -95,6 +95,14 @@ const BookingSystem: React.FC = () => {
       router.push("/Login");
     }
   }, []);
+
+  function getCurrentDate() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
 
   const handleChange = (e: any) => {
     setFormData({
@@ -161,7 +169,9 @@ const BookingSystem: React.FC = () => {
     <>
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-          <h2 className="text-2xl font-bold mb-4">Book a meeting</h2>
+          <h2 className="text-2xl font-bold mb-4 text-center">
+            Book a meeting
+          </h2>
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="col-span-2 mb-4">
@@ -177,6 +187,7 @@ const BookingSystem: React.FC = () => {
                   name="date"
                   value={formData.date}
                   onChange={handleChange}
+                  min={getCurrentDate()}
                   className="border-gray-300 border w-full rounded-md px-3 py-2"
                 />
               </div>
@@ -270,15 +281,19 @@ const BookingSystem: React.FC = () => {
                 >
                   Number of Attendees
                 </label>
-                <input
-                  type="number"
+                <select
                   id="numberOfAttendees"
                   name="numberOfAttendees"
                   value={formData.numberOfAttendees}
                   onChange={handleChange}
-                  max={10}
                   className="border-gray-300 border w-full rounded-md px-3 py-2"
-                />
+                >
+                  {[...Array(10)].map((_, index) => (
+                    <option key={index + 1} value={index + 1}>
+                      {index + 1}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="mb-4">
                 <label
@@ -287,14 +302,20 @@ const BookingSystem: React.FC = () => {
                 >
                   Organization
                 </label>
-                <input
-                  type="text"
+                <select
                   id="organization"
                   name="organization"
                   value={formData.organization}
                   onChange={handleChange}
                   className="border-gray-300 border w-full rounded-md px-3 py-2"
-                />
+                >
+                  <option value="">Select Organization</option>
+                  {organizations.map((org, index) => (
+                    <option key={index} value={org}>
+                      {org}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="col-span-2 mb-4">
                 <label

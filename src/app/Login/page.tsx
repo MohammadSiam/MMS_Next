@@ -45,7 +45,7 @@ const LoginPage: React.FC = () => {
       sessionStorage.setItem("token", response.data.token);
       // Check if the user is an admin
       const tokenData: any = jwt.decode(response.data.token);
-      if (tokenData.role === "admin") {
+      if (tokenData.role === "super admin") {
         // Redirect to admin dashboard if user is admin
         router.push("/admin/dashboard");
       } else {

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useRouter } from "next/navigation";
+
 import { useEffect, useState } from "react";
 
 export type Datatype = {
@@ -26,26 +27,47 @@ const Dashboard = () => {
   const router = useRouter();
   const [meetings, setMeetings] = useState<Datatype[]>([]);
   const [admins, setAdmins] = useState<any[]>([]);
-  const [buttonClicked, setButtonClicked] = useState(false); // State to track if button is clicked
-
-  const fetchMeetings = async () => {
-    try {
-      const token = sessionStorage.getItem("token");
-
-      if (!token) {
-        router.push("/Login");
-      }
-      const response = await axios.get(
-        "http://localhost:3000/book/getAllMeetings"
-      );
-      setMeetings(response.data.data);
-    } catch (error) {
-      console.error("Error fetching meetings:", error);
-    }
-  };
+  const [superAdmins, setSuperAdmins] = useState<any[]>([]);
+  const [buttonClicked, setButtonClicked] = useState(false);
+  const [userRole, setUserRole] = useState(null); // State to store user role
 
   useEffect(() => {
-    fetchMeetings();
+    const fetchData = async () => {
+      try {
+        const token = sessionStorage.getItem("token");
+
+        if (!token) {
+          router.push("/Login");
+          return; // Exit early if there's no token
+        }
+
+        const response = await axios.get(
+          "http://localhost:3000/book/getAllMeetings"
+        );
+        setMeetings(response.data.data);
+      } catch (error) {
+        console.error("Error fetching meetings:", error);
+      }
+    };
+
+    fetchData(); // Call the asynchronous function immediately
+  }, []);
+
+  useEffect(() => {
+    // Fetch admin status for the logged-in user
+    const fetchSuperAdmins = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/api/findSuperAdmin"
+        );
+
+        setSuperAdmins(response.data);
+      } catch (error) {
+        console.error("Error fetching admin status:", error);
+      }
+    };
+
+    fetchSuperAdmins(); // Call the async function to fetch admins
   }, []);
 
   useEffect(() => {
@@ -53,7 +75,7 @@ const Dashboard = () => {
     const fetchAdmins = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/api/findAllAdmin`
+          "http://localhost:3000/api/findAllAdmin"
         );
 
         setAdmins(response.data);
@@ -63,6 +85,30 @@ const Dashboard = () => {
     };
 
     fetchAdmins(); // Call the async function to fetch admins
+  }, []);
+
+  useEffect(() => {
+    const getUserRole = async () => {
+      const token = await sessionStorage.getItem("token");
+      if (token) {
+        // Split the token into its parts: header, payload, and signature
+        const parts = token.split(".");
+
+        // Decode the payload part (which is the second part)
+        const payload = JSON.parse(atob(parts[1]));
+
+        // Extract the userId from the payload
+        const role = payload.role;
+        return role;
+      }
+      return null; // Return null if session is not available
+    };
+    // Fetch and set the user's role when the component mounts
+    const fetchUserRole = async () => {
+      const role = await getUserRole();
+      setUserRole(role);
+    };
+    fetchUserRole();
   }, []);
 
   const handleAction = async (
@@ -108,8 +154,8 @@ const Dashboard = () => {
 
   return (
     <>
-      <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
+      <div className="container mx-auto p-4 w-full">
+        <h1 className="text-2xl font-bold mb-4 text-center">Admin Dashboard</h1>
         <div className="overflow-x-auto">
           <table className="table-auto w-full">
             <thead className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
@@ -122,8 +168,14 @@ const Dashboard = () => {
                 <th className="py-2">Designation</th>
                 <th className="py-2">Room Number</th>
                 <th className="py-2">User Name</th>
-                <th className="py-2">Action</th>
-                <th className="py-2">Change Role</th>
+                {userRole !== "user" && (
+                  <>
+                    <th className="py-2">Action</th>
+                    {userRole === "super admin" && (
+                      <th className="py-2">Change Role</th>
+                    )}
+                  </>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -135,72 +187,96 @@ const Dashboard = () => {
                       index % 2 === 0 ? "bg-white" : "bg-gray-200"
                     }`}
                   >
-                    <td className="px-4 py-2">{data.meeting.startTime}</td>
-                    <td className="px-4 py-2">{data.meeting.endTime}</td>
-                    <td className="px-4 py-2">{data.meeting.date}</td>
-                    <td className="px-4 py-2">
-                      {data?.meeting?.numberOfAttendees}
-                    </td>
-                    <td className="px-4 py-2">{data.meeting.organization}</td>
-                    <td className="px-4 py-2">{data.meeting.designation}</td>
-                    <td className="px-4 py-2">{data.meeting.roomNumber}</td>
-                    <td className="px-4 py-2">{data.username}</td>
-                    <td className="px-4 py-2">
-                      {data.meeting.status === "approved" ? (
-                        <span className="text-green-500">Accepted</span>
-                      ) : data.meeting.status === "rejected" ? (
-                        <span className="text-red-500">Rejected</span>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() =>
-                              handleAction(
-                                data.meeting.meetingId,
-                                "approve",
-                                index
-                              )
-                            }
-                            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
-                          >
-                            Accept
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleAction(
-                                data.meeting.meetingId,
-                                "reject",
-                                index
-                              )
-                            }
-                            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                          >
-                            Reject
-                          </button>
-                        </>
-                      )}
-                    </td>
-                    <td className="px-4 py-2">
-                      {Array.isArray(admins) ? (
-                        admins.some(
-                          (admin) =>
-                            admin.email === data.email && admin.role === "admin"
-                        ) ? (
-                          <button
-                            className="bg-green-500 text-white font-bold py-2 px-4 rounded cursor-not-allowed"
-                            disabled
-                          >
-                            Admin
-                          </button>
+                    <td className="py-2">{data.meeting.startTime}</td>
+                    <td className="py-2">{data.meeting.endTime}</td>
+                    <td className="py-2">{data.meeting.date}</td>
+                    <td className="py-2">{data?.meeting?.numberOfAttendees}</td>
+                    <td className="py-2">{data.meeting.organization}</td>
+                    <td className="py-2">{data.meeting.designation}</td>
+                    <td className="py-2">{data.meeting.roomNumber}</td>
+                    <td className="py-2">{data.username}</td>
+                    <td className="py-2">
+                      {userRole === "super admin" &&
+                        (data.meeting.status === "approved" ? (
+                          <span className="text-green-500">Accepted</span>
+                        ) : data.meeting.status === "rejected" ? (
+                          <span className="text-red-500">Rejected</span>
                         ) : (
+                          <>
+                            <button
+                              onClick={() =>
+                                handleAction(
+                                  data.meeting.meetingId,
+                                  "approve",
+                                  index
+                                )
+                              }
+                              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleAction(
+                                  data.meeting.meetingId,
+                                  "reject",
+                                  index
+                                )
+                              }
+                              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                            >
+                              Reject
+                            </button>
+                          </>
+                        ))}
+                      {userRole === "admin" &&
+                        (data.meeting.status === "approved" ? (
+                          <span className="text-green-500">Accepted</span>
+                        ) : data.meeting.status === "rejected" ? (
+                          <span className="text-red-500">Rejected</span>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() =>
+                                handleAction(
+                                  data.meeting.meetingId,
+                                  "approve",
+                                  index
+                                )
+                              }
+                              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleAction(
+                                  data.meeting.meetingId,
+                                  "reject",
+                                  index
+                                )
+                              }
+                              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                            >
+                              Reject
+                            </button>
+                          </>
+                        ))}
+                    </td>
+                    <td className="py-2">
+                      {admins.some((admin) => admin.email !== data.email) &&
+                        superAdmins.some(
+                          (admins) => admins.email !== data.email
+                        ) &&
+                        userRole === "super admin" && (
                           <button
-                            onClick={() => handleChangeRole(data.email)}
                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                            onClick={() => handleChangeRole(data.email)}
                             disabled={buttonClicked}
                           >
-                            {buttonClicked ? "Admin" : "Make Admin"}
+                            {buttonClicked ? "Admin Done" : "Make admin"}
                           </button>
-                        )
-                      ) : null}
+                        )}
                     </td>
                   </tr>
                 ))}

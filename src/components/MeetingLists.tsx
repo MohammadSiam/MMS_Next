@@ -61,7 +61,9 @@ const MeetingList = () => {
   return (
     <>
       <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">Your Meetings</h1>
+        <h1 className="text-2xl font-bold mb-4 text-center">
+          Your Meeting Lists
+        </h1>
         <div className="overflow-x-auto">
           <table className="table-auto w-full">
             <thead className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
