@@ -50,7 +50,7 @@ const LoginPage: React.FC = () => {
         router.push("/admin/dashboard");
       } else {
         // Redirect to regular user dashboard or meeting list page
-        router.push("/meetingList");
+        router.push("/booking");
       }
       setFormData({
         email: "",
