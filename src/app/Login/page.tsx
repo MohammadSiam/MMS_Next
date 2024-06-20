@@ -33,7 +33,7 @@ const LoginPage: React.FC = () => {
       const jsonData = JSON.stringify(formData);
 
       const response = await axios.post(
-        "http://localhost:3000/api/login",
+        "https://ts-express-production.up.railway.app/api/login",
         jsonData,
         {
           headers: {

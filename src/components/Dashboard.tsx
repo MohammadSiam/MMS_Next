@@ -42,7 +42,7 @@ const Dashboard = () => {
         }
 
         const response = await axios.get(
-          "http://localhost:3000/book/getAllMeetings"
+          "https://ts-express-production.up.railway.app/book/getAllMeetings"
         );
         setMeetings(response.data.data);
       } catch (error) {
@@ -58,7 +58,7 @@ const Dashboard = () => {
     const fetchSuperAdmins = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/api/findSuperAdmin"
+          "https://ts-express-production.up.railway.app/api/findSuperAdmin"
         );
 
         setSuperAdmins(response.data);
@@ -75,7 +75,7 @@ const Dashboard = () => {
     const fetchAdmins = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/api/findAllAdmin"
+          "https://ts-express-production.up.railway.app/api/findAllAdmin"
         );
 
         setAdmins(response.data);
@@ -118,7 +118,7 @@ const Dashboard = () => {
   ) => {
     try {
       const response = await axios.put(
-        `http://localhost:3000/book/${meetingId}/${action}`
+        `https://ts-express-production.up.railway.app/book/${meetingId}/${action}`
       );
       if (response.status === 200) {
         console.log(`Meeting ${action}ed successfully`);
@@ -138,7 +138,7 @@ const Dashboard = () => {
   const handleChangeRole = async (email: string) => {
     try {
       const response = await axios.put(
-        `http://localhost:3000/api/updateAdminRole/${email}`
+        `https://ts-express-production.up.railway.app/api/updateAdminRole/${email}`
       );
       console.log(response.data);
       if (response.status === 200) {
@@ -201,9 +201,8 @@ const Dashboard = () => {
                 meetings.map((data, index) => (
                   <tr
                     key={index}
-                    className={`${
-                      index % 2 === 0 ? "bg-white" : "bg-gray-200"
-                    }`}
+                    className={`${index % 2 === 0 ? "bg-white" : "bg-gray-200"
+                      }`}
                   >
                     <td className="px-4 py-2">{data.meeting.startTime}</td>
                     <td className="px-4 py-2">{data.meeting.endTime}</td>

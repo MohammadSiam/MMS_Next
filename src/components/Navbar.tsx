@@ -59,7 +59,7 @@ const NavBar: React.FC = () => {
                     {(role === "admin" || role === "super admin") && (
                       <Link legacyBehavior href="/admin/dashboard">
                         <a className="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
-                          Admin
+                          Admin Dashboard
                         </a>
                       </Link>
                     )}
@@ -117,7 +117,7 @@ const NavBar: React.FC = () => {
                 {(role === "admin" || role === "super admin") && (
                   <Link legacyBehavior href="/admin/dashboard">
                     <a className="text-white hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium">
-                      Admin
+                      Admin Dashboard
                     </a>
                   </Link>
                 )}

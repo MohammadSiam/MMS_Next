@@ -3,9 +3,11 @@
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Loading from "../app/loading";
 
 const MeetingList = () => {
   const [meetings, setMeetings] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   const getStatusColor = (status: any) => {
@@ -20,6 +22,8 @@ const MeetingList = () => {
         return ""; // Default color if status doesn't match any condition
     }
   };
+
+
 
   useEffect(() => {
     const fetchMeetings = async () => {
@@ -42,7 +46,7 @@ const MeetingList = () => {
 
           // Fetch meetings using the userId
           const response = await axios.get(
-            `http://localhost:3000/book/getMeetingByUserId/${userId}`
+            `https://ts-express-production.up.railway.app/book/getMeetingByUserId/${userId}`
           );
 
           // Set meetings state with fetched data
@@ -57,6 +61,10 @@ const MeetingList = () => {
 
     fetchMeetings();
   }, []);
+
+  if (!isLoading) {
+    return <Loading />;
+  }
 
   return (
     <>

@@ -27,7 +27,7 @@ export default function Admin() {
       const jsonData = JSON.stringify(formData);
 
       const response = await axios.post(
-        "http://localhost:3000/api/login/admin",
+        "https://ts-express-production.up.railway.app/api/login/admin",
         jsonData,
         {
           headers: {

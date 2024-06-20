@@ -43,7 +43,7 @@ const BookingSystem: React.FC = () => {
         const roomNumber = formData.roomNumber;
         if (selectedDate) {
           const response = await axios.get(
-            `http://localhost:3000/book/getAllMeetingsByDateRoom/${selectedDate}/${roomNumber}`
+            `https://ts-express-production.up.railway.app/book/getAllMeetingsByDateRoom/${selectedDate}/${roomNumber}`
           );
           const meetings: any[] = response.data;
           const meetingStatuses: MeetingInfo[] = meetings.map((meeting) => ({
@@ -141,7 +141,7 @@ const BookingSystem: React.FC = () => {
       const jsonData = JSON.stringify(formData);
 
       const response = await axios.post(
-        "http://localhost:3000/book/booking",
+        "https://ts-express-production.up.railway.app/book/booking",
         jsonData,
         {
           headers: {
