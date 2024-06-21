@@ -1,7 +1,12 @@
 // pages/LoginPage.tsx
 "use client";
+import {
+  getRoleFromToken,
+  getUserIdFromToken,
+  redirectUserBasedOnRole,
+  setToken,
+} from "@/utils/session";
 import axios from "axios";
-import jwt from "jsonwebtoken";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -13,6 +18,7 @@ const LoginPage: React.FC = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -26,8 +32,6 @@ const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Add registration logic here
-    // Once registration is successful, navigate to login page
 
     try {
       const jsonData = JSON.stringify(formData);
@@ -41,17 +45,19 @@ const LoginPage: React.FC = () => {
           },
         }
       );
-      sessionStorage.setItem("userId", response.data.token.userId);
-      sessionStorage.setItem("token", response.data.token);
-      // Check if the user is an admin
-      const tokenData: any = jwt.decode(response.data.token);
-      if (tokenData.role === "super admin") {
-        // Redirect to admin dashboard if user is admin
-        router.push("/admin/dashboard");
-      } else {
-        // Redirect to regular user dashboard or meeting list page
-        router.push("/booking");
+
+      setToken(response.data.token);
+
+      const userId: any = getUserIdFromToken(response.data.token);
+      if (userId) {
+        sessionStorage.setItem("userId", userId);
       }
+
+      const role = getRoleFromToken(response.data.token);
+      if (role) {
+        redirectUserBasedOnRole(role, router);
+      }
+
       setFormData({
         email: "",
         password: "",

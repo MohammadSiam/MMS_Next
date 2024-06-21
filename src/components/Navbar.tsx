@@ -1,5 +1,6 @@
 // NavBar.tsx
 "use client";
+import { getRoleFromToken, getToken, removeToken } from "@/utils/session";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -17,13 +18,11 @@ const NavBar: React.FC = () => {
   useEffect(() => {
     // Fetch user role when component mounts
     const fetchUserRole = async () => {
-      const sessionToken = await sessionStorage.getItem("token");
+      const sessionToken = getToken();
       setToken(sessionToken);
       if (sessionToken) {
-        const parts = sessionToken.split(".");
-        const payload = JSON.parse(atob(parts[1]));
-        const userRole = payload.role;
-        setRole(userRole); // Update role state
+        const userRole = getRoleFromToken(sessionToken);
+        setRole(userRole);
       } else {
         setToken(null);
         setRole(null);
@@ -33,8 +32,7 @@ const NavBar: React.FC = () => {
   }, []);
 
   const handleLogout = () => {
-    // Clear token from session storage
-    sessionStorage.removeItem("token");
+    removeToken();
     // Update token and role state
     setToken(null);
     setRole(null);

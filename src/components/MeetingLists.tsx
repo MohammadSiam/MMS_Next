@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  getToken,
+  getUserIdFromToken,
+  redirectToLoginIfNoToken,
+} from "@/utils/session";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -23,39 +28,25 @@ const MeetingList = () => {
     }
   };
 
-
-
   useEffect(() => {
     const fetchMeetings = async () => {
-      try {
-        // Retrieve the JWT token from localStorage
-        const token = sessionStorage.getItem("token");
-        if (!token) {
-          router.push("/Login");
+      if (!redirectToLoginIfNoToken(router)) {
+        return;
+      }
+
+      const token = getToken();
+      if (token) {
+        const userId = getUserIdFromToken(token);
+        if (userId) {
+          try {
+            const response = await axios.get(
+              `https://ts-express-production.up.railway.app/book/getMeetingByUserId/${userId}`
+            );
+            setMeetings(response.data.data);
+          } catch (error) {
+            console.log(error);
+          }
         }
-
-        if (token) {
-          // Split the token into its parts: header, payload, and signature
-          const parts = token.split(".");
-
-          // Decode the payload part (which is the second part)
-          const payload = JSON.parse(atob(parts[1]));
-
-          // Extract the userId from the payload
-          const userId = payload.userId;
-
-          // Fetch meetings using the userId
-          const response = await axios.get(
-            `https://ts-express-production.up.railway.app/book/getMeetingByUserId/${userId}`
-          );
-
-          // Set meetings state with fetched data
-          setMeetings(response.data.data);
-        } else {
-          console.error("JWT token not found in localStorage");
-        }
-      } catch (error) {
-        console.error("Error fetching meetings:", error);
       }
     };
 
