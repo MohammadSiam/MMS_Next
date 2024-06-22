@@ -1,5 +1,6 @@
 // pages/LoginPage.tsx
 "use client";
+import { AuthContext } from "@/context/AuthContext";
 import {
   getRoleFromToken,
   getUserIdFromToken,
@@ -8,7 +9,7 @@ import {
 } from "@/utils/session";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useContext, useState } from "react";
 
 const LoginPage: React.FC = () => {
   const router = useRouter();
@@ -18,6 +19,13 @@ const LoginPage: React.FC = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+
+  const authContext = useContext(AuthContext);
+  if (!authContext) {
+    throw new Error("AuthContext must be used within an AuthProvider");
+  }
+
+  const { setIsLoggedIn } = authContext;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -57,7 +65,7 @@ const LoginPage: React.FC = () => {
       if (role) {
         redirectUserBasedOnRole(role, router);
       }
-
+      setIsLoggedIn(true);
       setFormData({
         email: "",
         password: "",

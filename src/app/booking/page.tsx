@@ -1,4 +1,5 @@
 "use client";
+import { getToken, getUserIdFromToken } from "@/utils/session";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -28,7 +29,7 @@ const BookingSystem: React.FC = () => {
     numberOfAttendees: 1,
     organization: "",
     designation: "",
-    roomNumber: "",
+    roomNumber: "101",
     userId: "",
   });
   const [error, setError] = useState("");
@@ -72,23 +73,13 @@ const BookingSystem: React.FC = () => {
   }, [formData.date, formData.roomNumber]);
 
   useEffect(() => {
-    const token = sessionStorage.getItem("token");
+    const token = getToken();
     if (token) {
       try {
-        // Split the token into its parts: header, payload, and signature
-        const parts = token.split(".");
-
-        // Decode the payload part (which is the second part)
-        const payload = JSON.parse(atob(parts[1]));
-
-        // Extract the userId from the payload
-        const userId = payload.userId;
-
-        // Update formData with userId
+        const userId: any = getUserIdFromToken(token);
         setFormData({ ...formData, userId });
       } catch (error) {
         console.error("Error decoding token:", error);
-        // Handle any decoding errors here
       }
     }
     if (!token) {
@@ -205,7 +196,6 @@ const BookingSystem: React.FC = () => {
                   onChange={handleChange}
                   className="border-gray-300 border w-full rounded-md px-3 py-2"
                 >
-                  <option value="">Select Room</option>
                   <option value="101">101</option>
                   <option value="102">102</option>
                   <option value="103">103</option>

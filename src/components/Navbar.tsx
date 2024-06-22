@@ -1,42 +1,41 @@
 // NavBar.tsx
 "use client";
+import { AuthContext } from "@/context/AuthContext";
 import { getRoleFromToken, getToken, removeToken } from "@/utils/session";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 const NavBar: React.FC = () => {
-  const [token, setToken] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null); // Change type to string
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
+
+  const authContext = useContext(AuthContext);
+  if (!authContext) {
+    throw new Error("AuthContext must be used within an AuthProvider");
+  }
+
+  const { isLoggedIn, setIsLoggedIn } = authContext;
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
 
   useEffect(() => {
-    // Fetch user role when component mounts
-    const fetchUserRole = async () => {
-      const sessionToken = getToken();
-      setToken(sessionToken);
-      if (sessionToken) {
-        const userRole = getRoleFromToken(sessionToken);
-        setRole(userRole);
-      } else {
-        setToken(null);
-        setRole(null);
-      }
-    };
-    fetchUserRole();
-  }, []);
+    const sessionToken = getToken();
+    if (sessionToken) {
+      const userRole = getRoleFromToken(sessionToken);
+      setRole(userRole);
+    } else {
+      setRole(null);
+    }
+  }, [isLoggedIn]);
 
   const handleLogout = () => {
     removeToken();
-    // Update token and role state
-    setToken(null);
+    setIsLoggedIn(false);
     setRole(null);
-    // Redirect to login page
     router.push("/Login");
   };
 
@@ -52,7 +51,7 @@ const NavBar: React.FC = () => {
             </div>
             <div className="hidden md:block ml-4">
               <div className="flex items-baseline space-x-4">
-                {role && ( // Check if role exists
+                {isLoggedIn && role && (
                   <>
                     {(role === "admin" || role === "super admin") && (
                       <Link legacyBehavior href="/admin/dashboard">
@@ -79,7 +78,7 @@ const NavBar: React.FC = () => {
                     </button>
                   </>
                 )}
-                {!role && ( // Check if role does not exist
+                {!role && !isLoggedIn && (
                   <>
                     <Link legacyBehavior href="/Registration">
                       <a className="text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
@@ -110,7 +109,7 @@ const NavBar: React.FC = () => {
       {isOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            {role && ( // Check if role exists
+            {isLoggedIn && role ? (
               <>
                 {(role === "admin" || role === "super admin") && (
                   <Link legacyBehavior href="/admin/dashboard">
@@ -136,8 +135,7 @@ const NavBar: React.FC = () => {
                   Logout
                 </button>
               </>
-            )}
-            {!role && ( // Check if role does not exist
+            ) : (
               <>
                 <Link legacyBehavior href="/Registration">
                   <a className="text-white hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium">

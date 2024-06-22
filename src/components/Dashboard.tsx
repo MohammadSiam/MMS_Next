@@ -1,3 +1,5 @@
+"use client";
+import { getRoleFromToken, getToken } from "@/utils/session";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
@@ -29,16 +31,16 @@ const Dashboard = () => {
   const [admins, setAdmins] = useState<any[]>([]);
   const [superAdmins, setSuperAdmins] = useState<any[]>([]);
   const [buttonClicked, setButtonClicked] = useState(false);
-  const [userRole, setUserRole] = useState(null); // State to store user role
+  const [userRole, setUserRole] = useState<string | null>(null); // State to store user role
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = sessionStorage.getItem("token");
+        const token = getToken();
 
         if (!token) {
           router.push("/Login");
-          return; // Exit early if there's no token
+          return;
         }
 
         const response = await axios.get(
@@ -88,28 +90,13 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    const getUserRole = async () => {
-      const token = await sessionStorage.getItem("token");
-      if (token) {
-        // Split the token into its parts: header, payload, and signature
-        const parts = token.split(".");
-
-        // Decode the payload part (which is the second part)
-        const payload = JSON.parse(atob(parts[1]));
-
-        // Extract the userId from the payload
-        const role = payload.role;
-        return role;
-      }
-      return null; // Return null if session is not available
-    };
-    // Fetch and set the user's role when the component mounts
-    const fetchUserRole = async () => {
-      const role = await getUserRole();
-      setUserRole(role);
-    };
-    fetchUserRole();
+    const token: any = getToken();
+    const role = getRoleFromToken(token);
+    // console.log(role);
+    setUserRole(role);
   }, []);
+
+  // console.log("user role is : ", userRole);
 
   const handleAction = async (
     meetingId: any,
@@ -140,12 +127,6 @@ const Dashboard = () => {
       const response = await axios.put(
         `https://ts-express-production.up.railway.app/api/updateAdminRole/${email}`
       );
-      console.log(response.data);
-      if (response.status === 200) {
-        console.log("Role changed successfully");
-      } else {
-        console.error("Failed to change role:", response.data);
-      }
       setButtonClicked(true);
     } catch (error) {
       console.error("Error changing role:", error);
@@ -201,8 +182,9 @@ const Dashboard = () => {
                 meetings.map((data, index) => (
                   <tr
                     key={index}
-                    className={`${index % 2 === 0 ? "bg-white" : "bg-gray-200"
-                      }`}
+                    className={`${
+                      index % 2 === 0 ? "bg-white" : "bg-gray-200"
+                    }`}
                   >
                     <td className="px-4 py-2">{data.meeting.startTime}</td>
                     <td className="px-4 py-2">{data.meeting.endTime}</td>
@@ -289,13 +271,13 @@ const Dashboard = () => {
                         ))}
                     </td>
                     <td className="text-center py-2">
-                      {admins.some((admin) => admin.email !== data.email) &&
-                        superAdmins.some(
-                          (admins) => admins.email !== data.email
+                      {userRole === "super admin" &&
+                        !superAdmins.some(
+                          (admin) => admin.email === data.email
                         ) &&
-                        userRole === "super admin" && (
+                        !admins.some((admin) => admin.email === data.email) && (
                           <button
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-2  rounded"
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-2 rounded"
                             onClick={() => handleChangeRole(data.email)}
                             disabled={buttonClicked}
                           >

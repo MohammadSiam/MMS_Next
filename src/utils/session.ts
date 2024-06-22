@@ -1,3 +1,4 @@
+"use client";
 export const getToken = (): string | null => {
   return sessionStorage.getItem("token");
 };
@@ -21,7 +22,8 @@ export const getUserIdFromToken = (token: string): string | null => {
 export const getRoleFromToken = (token: string): string | null => {
   try {
     const decodedToken: any = decodeToken(token);
-    return decodedToken?.role || null;
+    // console.log(decodedToken.role);
+    return decodedToken.role || null;
   } catch (error) {
     console.error("Failed to decode token:", error);
     return null;
@@ -40,7 +42,7 @@ export const redirectUserBasedOnRole = (role: string, router: any) => {
   if (role === "super admin" || role === "admin") {
     router.push("/admin/dashboard");
   } else {
-    router.push("/booking");
+    router.push("/meetingList");
   }
 };
 
