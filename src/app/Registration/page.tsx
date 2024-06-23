@@ -16,7 +16,6 @@ const RegistrationPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const isFormValid = () => {
-    // Check if all form fields are valid
     return (
       isPasswordValid(formData.password) &&
       isEmailValid(formData.email) &&
@@ -28,22 +27,26 @@ const RegistrationPage: React.FC = () => {
   };
 
   const isPasswordValid = (password: any) => {
-    // Password should be at least 8 characters long
-    // and should contain at least one character and one digit
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return setError("Password must be at least 8 characters long and contain at least 1 letter and 1 number")
+    }
     return passwordRegex.test(password);
   };
 
   const isEmailValid = (email: any) => {
-    // Regular expression to validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return setError("Invalid email address")
+    }
     return emailRegex.test(email);
   };
 
   const isPhoneNumberValid = (phoneNumber: any) => {
-    // Regular expression for basic phone number validation
-    // This regex allows for digits only and expects exactly 10 digits
     const phoneRegex = /^\d{11}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      return setError("Invalid phone number")
+    }
     return phoneRegex.test(phoneNumber);
   };
 
@@ -56,31 +59,31 @@ const RegistrationPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Add registration logic here
-    // Once registration is successful, navigate to login page
+    if (!isFormValid()) {
+      return;
+    }
     try {
-      if (isFormValid()) {
-        const jsonData = JSON.stringify(formData);
+      const jsonData = JSON.stringify(formData);
 
-        const response = await axios.post(
-          "https://ts-express-production.up.railway.app/api/register",
-          jsonData,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        // console.log(response.data.message);
+      const response = await axios.post(
+        "https://ts-express-production.up.railway.app/api/register",
+        jsonData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.data.message) {
+        setError(response.data.message);
+      } else {
+        setError('');
         router.push("/Login");
       }
+
     } catch (error: any) {
       console.log(error);
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
+      if (error.response && error.response.data && error.response.data.message) {
         setError(error.response.data.message);
       } else {
         setError("An unexpected error occurred");
