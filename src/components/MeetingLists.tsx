@@ -63,72 +63,76 @@ const MeetingList = () => {
         <h1 className="text-2xl font-bold mb-4 text-center">
           Your Meeting Lists
         </h1>
-        <div className="relative overflow-x-auto">
-          <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-            <thead className="text-sm text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-              <tr>
-                <th scope="col" className="px-4 py-2">
-                  Start Time
-                </th>
-                <th scope="col" className="py-2 px-4">
-                  End Time
-                </th>
-                <th scope="col" className="py-2 px-14">
-                  Date
-                </th>
-                <th scope="col" className="py-2 px-4">
-                  Number of Attendees
-                </th>
-                <th scope="col" className="py-2 px-4">
-                  Organization
-                </th>
-                <th scope="col" className="py-2 px-4">
-                  Designation
-                </th>
-                <th scope="col" className="py-2 px-4">
-                  Room Number
-                </th>
-                <th scope="col" className="py-2 px-4">
-                  Status
-                </th>
-                {/* Add more headers as needed */}
-              </tr>
-            </thead>
-
-            <tbody>
-              {meetings.map((meeting: any, index: number) => (
-                <tr
-                  key={index}
-                  className={`${index % 2 === 0 ? "bg-white" : "bg-gray-200"}`}
-                >
-                  <td className="text-center px-2 py-2">{meeting.startTime}</td>
-                  <td className="text-center px-4 py-2">{meeting.endTime}</td>
-                  <td className="text-center px-4 py-2">{meeting.date}</td>
-                  <td className="text-center px-4 py-2">
-                    {meeting.numberOfAttendees}
-                  </td>
-                  <td className="text-center px-4 py-2">
-                    {meeting.organization}
-                  </td>
-                  <td className="text-center px-4 py-2">
-                    {meeting.designation}
-                  </td>
-                  <td className="text-center px-4 py-2">
-                    {meeting.roomNumber}
-                  </td>
-                  <td
-                    className={`text-center px-4 py-2 ${getStatusColor(
-                      meeting.status
-                    )}`}
-                  >
-                    {meeting.status}
-                  </td>
-                  {/* Add more columns for other meeting data */}
+        {meetings.length === 0 ? (
+          <p className="text-center text-gray-500">No meetings available</p>
+        ) : (
+          <div className="relative overflow-x-auto">
+            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+              <thead className="text-sm text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                  <th scope="col" className="px-4 py-2">
+                    Start Time
+                  </th>
+                  <th scope="col" className="py-2 px-4">
+                    End Time
+                  </th>
+                  <th scope="col" className="py-2 px-14">
+                    Date
+                  </th>
+                  <th scope="col" className="py-2 px-4">
+                    Number of Attendees
+                  </th>
+                  <th scope="col" className="py-2 px-4">
+                    Organization
+                  </th>
+                  <th scope="col" className="py-2 px-4">
+                    Designation
+                  </th>
+                  <th scope="col" className="py-2 px-4">
+                    Room Number
+                  </th>
+                  <th scope="col" className="py-2 px-4">
+                    Status
+                  </th>
+                  {/* Add more headers as needed */}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+
+              <tbody>
+                {meetings.map((meeting: any, index: number) => (
+                  <tr
+                    key={index}
+                    className={`${index % 2 === 0 ? "bg-white" : "bg-gray-200"}`}
+                  >
+                    <td className="text-center px-2 py-2">{meeting.startTime}</td>
+                    <td className="text-center px-4 py-2">{meeting.endTime}</td>
+                    <td className="text-center px-4 py-2">{meeting.date}</td>
+                    <td className="text-center px-4 py-2">
+                      {meeting.numberOfAttendees}
+                    </td>
+                    <td className="text-center px-4 py-2">
+                      {meeting.organization}
+                    </td>
+                    <td className="text-center px-4 py-2">
+                      {meeting.designation}
+                    </td>
+                    <td className="text-center px-4 py-2">
+                      {meeting.roomNumber}
+                    </td>
+                    <td
+                      className={`text-center px-4 py-2 ${getStatusColor(
+                        meeting.status
+                      )}`}
+                    >
+                      {meeting.status}
+                    </td>
+                    {/* Add more columns for other meeting data */}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </>
   );
