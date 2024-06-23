@@ -12,56 +12,71 @@ const RegistrationPage: React.FC = () => {
     department: "",
     password: "",
   });
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({
+    username: "",
+    email: "",
+    phone: "",
+    department: "",
+    password: "",
+    form: "",
+  });
   const [showPassword, setShowPassword] = useState(false);
 
-  const isFormValid = () => {
-    return (
-      isPasswordValid(formData.password) &&
-      isEmailValid(formData.email) &&
-      isPhoneNumberValid(formData.phone)
-    );
-  };
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
   };
 
-  const isPasswordValid = (password: any) => {
+  const validatePassword = (password: string) => {
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-    if (!passwordRegex.test(password)) {
-      return setError("Password must be at least 8 characters long and contain at least 1 letter and 1 number")
-    }
     return passwordRegex.test(password);
   };
 
-  const isEmailValid = (email: any) => {
+  const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return setError("Invalid email address")
-    }
     return emailRegex.test(email);
   };
 
-  const isPhoneNumberValid = (phoneNumber: any) => {
+  const validatePhoneNumber = (phoneNumber: string) => {
     const phoneRegex = /^\d{11}$/;
-    if (!phoneRegex.test(phoneNumber)) {
-      return setError("Invalid phone number")
-    }
     return phoneRegex.test(phoneNumber);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
+
+    // Reset individual field error when user modifies the input
+    setErrors({ ...errors, [name]: "", form: "" });
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!isFormValid()) {
+    let hasError = false;
+    const newErrors = { ...errors };
+
+    if (!validatePassword(formData.password)) {
+      newErrors.password = "Password must be at least 8 characters long and contain at least 1 letter and 1 number";
+      hasError = true;
+    }
+
+    if (!validateEmail(formData.email)) {
+      newErrors.email = "Invalid email address";
+      hasError = true;
+    }
+
+    if (!validatePhoneNumber(formData.phone)) {
+      newErrors.phone = "Invalid phone number";
+      hasError = true;
+    }
+
+    if (hasError) {
+      setErrors(newErrors);
       return;
     }
+
     try {
       const jsonData = JSON.stringify(formData);
 
@@ -74,19 +89,17 @@ const RegistrationPage: React.FC = () => {
           },
         }
       );
+
       if (response.data.message) {
-        setError(response.data.message);
+        setErrors({ ...errors, form: response.data.message });
       } else {
-        setError('');
         router.push("/Login");
       }
-
     } catch (error: any) {
-      console.log(error);
       if (error.response && error.response.data && error.response.data.message) {
-        setError(error.response.data.message);
+        setErrors({ ...errors, form: error.response.data.message });
       } else {
-        setError("An unexpected error occurred");
+        setErrors({ ...errors, form: "An unexpected error occurred" });
       }
     }
   };
@@ -100,7 +113,7 @@ const RegistrationPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 mb-4">
                 <label
-                  htmlFor="firstName"
+                  htmlFor="username"
                   className="block text-gray-700 font-semibold mb-2"
                 >
                   Full Name
@@ -113,6 +126,9 @@ const RegistrationPage: React.FC = () => {
                   onChange={handleChange}
                   className="border-gray-300 border w-full rounded-md px-3 py-2"
                 />
+                {errors.username && (
+                  <p className="text-red-500 text-xs mt-1">{errors.username}</p>
+                )}
               </div>
 
               <div className="col-span-2 mb-4">
@@ -130,12 +146,11 @@ const RegistrationPage: React.FC = () => {
                   onChange={handleChange}
                   className="border-gray-300 border w-full rounded-md px-3 py-2"
                 />
-                {!isEmailValid(formData.email) && (
-                  <p className="text-red-500 text-xs mt-1">
-                    Please enter a valid email address.
-                  </p>
+                {errors.email && (
+                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
                 )}
               </div>
+
               <div className="col-span-2 mb-4">
                 <label
                   htmlFor="password"
@@ -162,13 +177,11 @@ const RegistrationPage: React.FC = () => {
                     </button>
                   )}
                 </div>
-                {!isPasswordValid(formData.password) && (
-                  <p className="text-red-500 text-xs mt-1">
-                    Password must be at least 8 characters long and contain at
-                    least one letter and one digit.
-                  </p>
+                {errors.password && (
+                  <p className="text-red-500 text-xs mt-1">{errors.password}</p>
                 )}
               </div>
+
               <div className="col-span-2 mb-4">
                 <label
                   htmlFor="phone"
@@ -184,7 +197,11 @@ const RegistrationPage: React.FC = () => {
                   onChange={handleChange}
                   className="border-gray-300 border w-full rounded-md px-3 py-2"
                 />
+                {errors.phone && (
+                  <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+                )}
               </div>
+
               <div className="col-span-2 mb-4">
                 <label
                   htmlFor="department"
@@ -202,7 +219,8 @@ const RegistrationPage: React.FC = () => {
                 />
               </div>
             </div>
-            {error && <p className="text-red-500 mb-4">{error}</p>}
+
+            {errors.form && <p className="text-red-500 mb-4">{errors.form}</p>}
 
             <button
               type="submit"
