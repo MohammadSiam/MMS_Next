@@ -164,7 +164,7 @@ const BookingSystem: React.FC = () => {
             Book a meeting
           </h2>
           <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 sm:grid-cols-1 gap-4">
               <div className="col-span-2 mb-4">
                 <label
                   htmlFor="date"
@@ -201,7 +201,7 @@ const BookingSystem: React.FC = () => {
                   <option value="103">103</option>
                 </select>
               </div>
-              <div className="mb-4">
+              <div className="mb-4 col-span-2 md:col-span-1 lg:col-span-1">
                 <label
                   htmlFor="startTime"
                   className="block text-gray-700 font-semibold mb-2"
@@ -245,7 +245,7 @@ const BookingSystem: React.FC = () => {
                 </select>
               </div>
 
-              <div className="mb-4">
+              <div className="mb-4 col-span-2 md:col-span-1 lg:col-span-1">
                 <label
                   htmlFor="endTime"
                   className="block text-gray-700 font-semibold mb-2"
@@ -264,7 +264,7 @@ const BookingSystem: React.FC = () => {
                   className="border-gray-300 border w-full rounded-md px-3 py-2"
                 />
               </div>
-              <div className="mb-4">
+              <div className="mb-4 col-span-2 md:col-span-1 lg:col-span-1">
                 <label
                   htmlFor="numberOfAttendees"
                   className="block text-gray-700 font-semibold mb-2"
@@ -285,7 +285,7 @@ const BookingSystem: React.FC = () => {
                   ))}
                 </select>
               </div>
-              <div className="mb-4">
+              <div className="mb-4 col-span-2 md:col-span-1 lg:col-span-1">
                 <label
                   htmlFor="organization"
                   className="block text-gray-700 font-semibold mb-2"
@@ -307,7 +307,7 @@ const BookingSystem: React.FC = () => {
                   ))}
                 </select>
               </div>
-              <div className="col-span-2 mb-4">
+              <div className="mb-4 col-span-2 md:col-span-1 lg:col-span-1">
                 <label
                   htmlFor="designation"
                   className="block text-gray-700 font-semibold mb-2"
