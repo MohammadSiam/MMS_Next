@@ -37,6 +37,7 @@ const NavBar: React.FC = () => {
     setIsLoggedIn(false);
     setRole(null);
     router.push("/Login");
+    setIsOpen(!isOpen);
   };
 
   return (
@@ -113,18 +114,27 @@ const NavBar: React.FC = () => {
               <>
                 {(role === "admin" || role === "super admin") && (
                   <Link legacyBehavior href="/admin/dashboard">
-                    <a className="text-white hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium">
+                    <a
+                      onClick={() => setIsOpen(!isOpen)}
+                      className="text-white hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium"
+                    >
                       Admin Dashboard
                     </a>
                   </Link>
                 )}
                 <Link legacyBehavior href="/booking">
-                  <a className="text-white hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium">
+                  <a
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="text-white hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium"
+                  >
                     Booking
                   </a>
                 </Link>
                 <Link legacyBehavior href="/meetingList">
-                  <a className="text-white hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium">
+                  <a
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="text-white hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium"
+                  >
                     Meetings
                   </a>
                 </Link>
@@ -138,12 +148,18 @@ const NavBar: React.FC = () => {
             ) : (
               <>
                 <Link legacyBehavior href="/Registration">
-                  <a className="text-white hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium">
+                  <a
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="text-white hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium"
+                  >
                     Registration
                   </a>
                 </Link>
                 <Link legacyBehavior href="/Login">
-                  <a className="text-white hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium">
+                  <a
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="text-white hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium"
+                  >
                     Login
                   </a>
                 </Link>
