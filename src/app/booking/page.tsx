@@ -216,11 +216,10 @@ const BookingSystem: React.FC = () => {
           },
         }
       );
-      console.log(response);
-      // if (response.data.data.message) {
-      //   setError(response.data.data.message);
-      //   return;
-      // }
+      if (response.data.data.message) {
+        setError(response.data.data.message);
+        return;
+      }
       setShowPopup(true);
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
