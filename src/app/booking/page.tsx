@@ -131,6 +131,7 @@ const BookingSystem: React.FC = () => {
   }
 
   const handleChange = (e: any) => {
+    setError("");
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
