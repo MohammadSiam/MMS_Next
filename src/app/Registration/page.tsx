@@ -11,7 +11,7 @@ const RegistrationPage: React.FC = () => {
     phone: "",
     department: "",
     password: "",
-    image: null as File | null
+    image: null as File | null,
   });
   const [errors, setErrors] = useState({
     username: "",
@@ -23,6 +23,7 @@ const RegistrationPage: React.FC = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [isDisabled, setisDisabled] = useState(false);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileInput = e.target;
@@ -68,11 +69,13 @@ const RegistrationPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setisDisabled(true);
     let hasError = false;
     const newErrors = { ...errors };
 
     if (!validatePassword(formData.password)) {
-      newErrors.password = "Password must be at least 8 characters long and contain at least 1 letter and 1 number";
+      newErrors.password =
+        "Password must be at least 8 characters long and contain at least 1 letter and 1 number";
       hasError = true;
     }
 
@@ -92,17 +95,33 @@ const RegistrationPage: React.FC = () => {
     }
 
     try {
-      const jsonData = JSON.stringify(formData);
+      // const jsonData = JSON.stringify(formData);
+
+      const formDataToSend = new FormData();
+      formDataToSend.append(
+        "data",
+        JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+          phone: formData.phone,
+          department: formData.department,
+        })
+      );
+      if (formData.image) {
+        formDataToSend.append("image", formData.image);
+      }
 
       const response = await axios.post(
         "https://ts-express-production.up.railway.app/api/register",
-        jsonData,
+        formDataToSend,
         {
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "multipart/form-data",
           },
         }
       );
+      console.log(response);
 
       if (response.data.message) {
         setErrors({ ...errors, form: response.data.message });
@@ -110,7 +129,11 @@ const RegistrationPage: React.FC = () => {
         router.push("/Login");
       }
     } catch (error: any) {
-      if (error.response && error.response.data && error.response.data.message) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
         setErrors({ ...errors, form: error.response.data.message });
       } else {
         setErrors({ ...errors, form: "An unexpected error occurred" });
@@ -264,6 +287,7 @@ const RegistrationPage: React.FC = () => {
             <button
               type="submit"
               className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
+              disabled={isDisabled}
             >
               Register
             </button>

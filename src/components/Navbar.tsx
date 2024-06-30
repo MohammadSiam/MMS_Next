@@ -1,7 +1,14 @@
 // NavBar.tsx
 "use client";
 import { AuthContext } from "@/context/AuthContext";
-import { getRoleFromToken, getToken, removeToken } from "@/utils/session";
+import {
+  getRoleFromToken,
+  getToken,
+  getUserIdFromToken,
+  removeToken,
+} from "@/utils/session";
+import axios from "axios";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
@@ -9,6 +16,7 @@ import { useContext, useEffect, useState } from "react";
 const NavBar: React.FC = () => {
   const [role, setRole] = useState<string | null>(null); // Change type to string
   const [isOpen, setIsOpen] = useState(false);
+  const [userImage, setUserImage] = useState(null);
   const router = useRouter();
 
   const authContext = useContext(AuthContext);
@@ -32,6 +40,25 @@ const NavBar: React.FC = () => {
     }
   }, [isLoggedIn]);
 
+  useEffect(() => {
+    const fetchUserImage = async () => {
+      try {
+        const token: any = getToken();
+        const userId: any = getUserIdFromToken(token);
+        const response = await axios.get(
+          `https://ts-express-production.up.railway.app/api/findRegisterById/${userId}`
+        );
+        setUserImage(response.data.data.imagePath);
+      } catch (error) {
+        console.error("Error fetching user image:", error);
+      }
+    };
+
+    if (isLoggedIn && role) {
+      fetchUserImage();
+    }
+  }, [isLoggedIn, role]);
+
   const handleLogout = () => {
     removeToken();
     setIsLoggedIn(false);
@@ -51,7 +78,7 @@ const NavBar: React.FC = () => {
               </Link>
             </div>
             <div className="hidden md:block ml-4">
-              <div className="flex items-baseline space-x-4">
+              <div className="flex items-center space-x-4">
                 {isLoggedIn && role && (
                   <>
                     {(role === "admin" || role === "super admin") && (
@@ -92,6 +119,20 @@ const NavBar: React.FC = () => {
                       </a>
                     </Link>
                   </>
+                )}
+                {/* Display user image if available */}
+                {isLoggedIn && role && userImage && (
+                  <div className="flex items-center">
+                    <div className="relative">
+                      <Image
+                        src={userImage}
+                        alt="User Image"
+                        width={30}
+                        height={30}
+                        className="rounded-full"
+                      />
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
