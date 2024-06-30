@@ -11,6 +11,7 @@ const RegistrationPage: React.FC = () => {
     phone: "",
     department: "",
     password: "",
+    image: null as File | null
   });
   const [errors, setErrors] = useState({
     username: "",
@@ -21,6 +22,19 @@ const RegistrationPage: React.FC = () => {
     form: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileInput = e.target;
+    const file = fileInput.files?.[0];
+    if (file) {
+      setFormData({
+        ...formData,
+        image: file,
+      });
+      setPreviewImage(URL.createObjectURL(file));
+    }
+  };
 
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
@@ -218,6 +232,31 @@ const RegistrationPage: React.FC = () => {
                   className="border-gray-300 border w-full rounded-md px-3 py-2"
                 />
               </div>
+              <div className="col-span-2 mb-4">
+                <label
+                  htmlFor="image"
+                  className="block text-gray-700 font-semibold mb-2"
+                >
+                  Upload Image
+                </label>
+                <input
+                  type="file"
+                  id="image"
+                  name="image"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="border-gray-300 border w-full rounded-md px-3 py-2"
+                />
+              </div>
+              {previewImage && (
+                <div className="col-span-2 mb-4">
+                  <img
+                    src={previewImage}
+                    alt="Preview"
+                    className="rounded-md w-full"
+                  />
+                </div>
+              )}
             </div>
 
             {errors.form && <p className="text-red-500 mb-4">{errors.form}</p>}
